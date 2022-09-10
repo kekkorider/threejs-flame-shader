@@ -1,20 +1,17 @@
-
 import {
   Scene,
   WebGLRenderer,
   PerspectiveCamera,
+  SphereGeometry,
   BoxGeometry,
-  MeshStandardMaterial,
   Mesh,
-  PointLight,
   Clock,
-  Vector2
+  Vector2,
+  MeshBasicMaterial
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-
-import { SampleShaderMaterial } from './materials/SampleShaderMaterial'
-import { gltfLoader } from './loaders'
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
 
 class App {
   #resizeCallback = () => this.#onResize()
@@ -29,13 +26,10 @@ class App {
     this.#createCamera()
     this.#createRenderer()
     this.#createBox()
-    this.#createShadedBox()
-    this.#createLight()
     this.#createClock()
     this.#addListeners()
     this.#createControls()
-
-    await this.#loadModel()
+    this.#createTransformControls()
 
     if (window.location.hash.includes('#debug')) {
       const panel = await import('./Debug.js')
@@ -57,12 +51,6 @@ class App {
 
   #update() {
     const elapsed = this.clock.getElapsedTime()
-
-    this.box.rotation.y = elapsed
-    this.box.rotation.z = elapsed*0.6
-
-    this.shadedBox.rotation.y = elapsed
-    this.shadedBox.rotation.z = elapsed*0.6
   }
 
   #render() {
@@ -92,59 +80,31 @@ class App {
     this.renderer.physicallyCorrectLights = true
   }
 
-  #createLight() {
-    this.pointLight = new PointLight(0xff0055, 500, 100, 2)
-    this.pointLight.position.set(0, 10, 13)
-    this.scene.add(this.pointLight)
-  }
-
-  /**
-   * Create a box with a PBR material
-   */
   #createBox() {
-    const geometry = new BoxGeometry(1, 1, 1, 1, 1, 1)
+    const geometry = new BoxGeometry(1, 1, 1)
+    geometry.scale(0.35, 0.35, 0.35)
 
-    const material = new MeshStandardMaterial({
-      color: 0xffffff,
-      metalness: 0.7,
-      roughness: 0.35
-    })
+    const material = new MeshBasicMaterial({ color: 0xffffff, wireframe: true })
 
     this.box = new Mesh(geometry, material)
-    this.box.position.x = -1.5
 
     this.scene.add(this.box)
   }
 
-  /**
-   * Create a box with a custom ShaderMaterial
-   */
-  #createShadedBox() {
-    const geometry = new BoxGeometry(1, 1, 1, 1, 1, 1)
-
-    this.shadedBox = new Mesh(geometry, SampleShaderMaterial)
-    this.shadedBox.position.x = 1.5
-
-    this.scene.add(this.shadedBox)
-  }
-
-  /**
-   * Load a 3D model and append it to the scene
-   */
-  async #loadModel() {
-    const gltf = await gltfLoader.load('/suzanne.glb')
-
-    const mesh = gltf.scene.children[0]
-    mesh.position.z = 1.5
-
-    mesh.material = SampleShaderMaterial.clone()
-    mesh.material.wireframe = true
-
-    this.scene.add(mesh)
-  }
-
   #createControls() {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+  }
+
+  #createTransformControls() {
+    const controls = new TransformControls(this.camera, this.renderer.domElement)
+
+    controls.addEventListener('dragging-changed', event => {
+      this.controls.enabled = !event.value
+    })
+
+    controls.attach(this.box)
+
+    this.scene.add(controls)
   }
 
   #createClock() {

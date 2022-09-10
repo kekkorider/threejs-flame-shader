@@ -13,6 +13,10 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
 
+import { textureLoader } from './loaders'
+
+import { SphereMaterial } from './materials/SphereMaterial/index.js'
+
 class App {
   #resizeCallback = () => this.#onResize()
 
@@ -25,7 +29,11 @@ class App {
     this.#createScene()
     this.#createCamera()
     this.#createRenderer()
+
+    await this.#loadTextures()
+
     this.#createBox()
+    this.#createSphere()
     this.#createClock()
     this.#addListeners()
     this.#createControls()
@@ -80,6 +88,16 @@ class App {
     this.renderer.physicallyCorrectLights = true
   }
 
+  async #loadTextures() {
+    const [matcap] = await textureLoader.load([
+      '/matcap-01.png'
+    ])
+
+    this.textures = {
+      matcap
+    }
+  }
+
   #createBox() {
     const geometry = new BoxGeometry(1, 1, 1)
     geometry.scale(0.35, 0.35, 0.35)
@@ -91,20 +109,33 @@ class App {
     this.scene.add(this.box)
   }
 
+  #createSphere() {
+    const geometry = new SphereGeometry(1, 32, 32)
+
+    this.sphere = new Mesh(geometry, SphereMaterial)
+
+    this.sphere.material.uniforms.matcap.value = this.textures.matcap
+
+    this.sphere.position.set(1.7, 0.1, 0.0)
+
+    this.scene.add(this.sphere)
+  }
+
   #createControls() {
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+    this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement)
   }
 
   #createTransformControls() {
-    const controls = new TransformControls(this.camera, this.renderer.domElement)
+    this.transformControls = new TransformControls(this.camera, this.renderer.domElement)
 
-    controls.addEventListener('dragging-changed', event => {
-      this.controls.enabled = !event.value
+    this.transformControls.addEventListener('dragging-changed', event => {
+      this.orbitControls.enabled = !event.value
     })
 
-    controls.attach(this.box)
+    this.transformControls.attach(this.box)
+    this.transformControls.attach(this.sphere)
 
-    this.scene.add(controls)
+    this.scene.add(this.transformControls)
   }
 
   #createClock() {

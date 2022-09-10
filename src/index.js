@@ -8,7 +8,8 @@ import {
   Clock,
   Vector2,
   MeshBasicMaterial,
-  RepeatWrapping
+  RepeatWrapping,
+  GridHelper
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
@@ -16,7 +17,7 @@ import { TransformControls } from 'three/examples/jsm/controls/TransformControls
 
 import { textureLoader } from './loaders'
 
-import { SphereMaterial } from './materials/SphereMaterial/index.js'
+import { SphereMaterial } from './materials/SphereMaterial'
 
 class App {
   #resizeCallback = () => this.#onResize()
@@ -39,6 +40,7 @@ class App {
     this.#addListeners()
     this.#createControls()
     this.#createTransformControls()
+    this.#createGrid()
 
     if (window.location.hash.includes('#debug')) {
       const panel = await import('./Debug.js')
@@ -60,6 +62,8 @@ class App {
 
   #update() {
     const elapsed = this.clock.getElapsedTime()
+
+    this.box.position.y = Math.sin(elapsed)
 
     this.sphere.material.uniforms.u_PivotPosition.value = this.box.position
     this.sphere.material.uniforms.u_time.value = elapsed
@@ -141,10 +145,15 @@ class App {
       this.orbitControls.enabled = !event.value
     })
 
-    this.transformControls.attach(this.box)
     this.transformControls.attach(this.sphere)
 
     this.scene.add(this.transformControls)
+  }
+
+  #createGrid() {
+    const helper = new GridHelper(20, 10, 0x444444, 0x444444)
+
+    this.scene.add(helper)
   }
 
   #createClock() {

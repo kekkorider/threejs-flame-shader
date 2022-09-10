@@ -15,10 +15,10 @@ export const SphereMaterial = new ShaderMaterial({
     matcap: { value: null },
     t_noise: { value: null },
     u_time: { value: 0 },
-    u_FlameColor: { value: new Color(1, 0, 0) },
-    u_AlphaFalloffStart: { value: 0.6 },
-    u_AlphaFalloffEnd: { value: 0.7 },
-    u_FlameFalloffStart: { value: 0.6 },
-    u_FlameFalloffEnd: { value: 0.9 }
+    u_FlameColor: { value: new Color(0, 0.725, 1) },
+    u_AlphaFalloffStart: { value: 0.3 },
+    u_AlphaFalloffEnd: { value: 0.4 },
+    u_FlameFalloffStart: { value: 0.45 },
+    u_FlameFalloffEnd: { value: 0.48 }
   }
 })

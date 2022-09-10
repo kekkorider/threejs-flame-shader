@@ -8,6 +8,7 @@ export class Debug {
     this.#createPanel()
     this.#createSceneConfig()
     this.#createSphereConfig()
+    this.#createBloomConfig()
   }
 
   refresh() {
@@ -49,11 +50,25 @@ export class Debug {
     folder.addInput(mesh.material.uniforms.u_FlameFalloffEnd, 'value', { label: 'Flame falloff end', min: 0, max: 1 })
   }
 
+  #createBloomConfig() {
+    const folder = this.pane.addFolder({ title: 'Postprocess - Bloom' })
+
+    folder.addInput(this.app.bloomPass, 'enabled', { label: 'Enabled' })
+
+    folder.addSeparator()
+
+    folder.addInput(this.app.bloomPass, 'threshold', { label: 'Threshold', min: 0, max: 1 })
+    folder.addInput(this.app.bloomPass, 'strength', { label: 'Strength', min: 0, max: 3 })
+    folder.addInput(this.app.bloomPass, 'radius', { label: 'Radius', min: 0, max: 1 })
+  }
+
   /**
    * Adds a color control for the given object to the given folder.
    *
-   * @param {*} obj Any THREE object with a color property
-   * @param {*} folder The folder to add the control to
+   * @param {Object} obj Any THREE object with a color property
+   * @param {Object} folder The folder to add the control to
+   *
+   * @method #createColorControl()
    */
   #createColorControl(obj, folder) {
     const baseColor255 = obj.color.clone().multiplyScalar(255)
@@ -65,10 +80,14 @@ export class Debug {
   }
 
   /**
-   * Adds a color control for the given object to the given folder.
+   * Adds a control for a custom color uniform of the given material.
    *
-   * @param {*} obj Any THREE object with a color property
-   * @param {*} folder The folder to add the control to
+   * @param {THREE.Material} material The target `THREE.Material`
+   * @param {String} uniformName The name of the target uniform
+   * @param {Object} folder The folder to add the control to
+   * @param {String} label The custom label for the control
+   *
+   * @method #createColorUniformControl()
    */
   #createColorUniformControl(material, uniformName, folder, label = 'Color') {
     const baseColor255 = material.uniforms[`${uniformName}`].value.clone().multiplyScalar(255)

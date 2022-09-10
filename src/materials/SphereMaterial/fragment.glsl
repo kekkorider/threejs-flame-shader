@@ -36,7 +36,7 @@ void main() {
   float alphaFalloff = smoothstep(u_AlphaFalloffStart, u_AlphaFalloffEnd, mixValue);
   float flameFalloff = smoothstep(u_FlameFalloffStart, u_FlameFalloffEnd, mixValue);
 
-  outgoingLight = mix(outgoingLight, u_FlameColor, 1.0 - flameFalloff);
+  outgoingLight = mix(outgoingLight, u_FlameColor+u_FlameColor, 1.0 - flameFalloff);
 
   #include <output_fragment>
 

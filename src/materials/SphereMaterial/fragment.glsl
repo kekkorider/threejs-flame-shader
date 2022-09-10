@@ -28,17 +28,25 @@ void main() {
   vec4 matcapColor = texture2D(matcap, uv);
   vec3 outgoingLight = diffuseColor.rgb * matcapColor.rgb;
 
+  // Get the distance between the mesh (`vWorldPosition`) and
+  // the object used to trigger the effect (`u_PivotPosition`).
   float distanceFromPivot = distance(vWorldPosition, u_PivotPosition);
 
+  // Animated noise texture
   vec4 tNoise = texture2D(t_noise, uv+vec2(u_time* -0.2, u_time*0.1));
 
+  // This value is used to fade out the colors based on
+  // how close the mesh is to `u_PivotPosition`.
+  // Subtracting one of the texture's channels makes it look "flamy"
   float mixValue = distanceFromPivot - 1.0 - tNoise.b;
-  float alphaFalloff = smoothstep(u_AlphaFalloffStart, u_AlphaFalloffEnd, mixValue);
-  float flameFalloff = smoothstep(u_FlameFalloffStart, u_FlameFalloffEnd, mixValue);
 
+  // Mix the matcap with the flames' color given the `flameFalloff` value
+  float flameFalloff = smoothstep(u_FlameFalloffStart, u_FlameFalloffEnd, mixValue);
   outgoingLight = mix(outgoingLight, u_FlameColor+u_FlameColor, 1.0 - flameFalloff);
 
   #include <output_fragment>
 
+  // Same as `flameFalloff`, but for the alpha channel
+  float alphaFalloff = smoothstep(u_AlphaFalloffStart, u_AlphaFalloffEnd, mixValue);
   gl_FragColor.a = alphaFalloff;
 }

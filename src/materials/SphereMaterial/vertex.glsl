@@ -1,4 +1,5 @@
 varying vec3 vViewPosition;
+varying vec3 vWorldPosition;
 
 #include <normal_pars_vertex>
 
@@ -11,4 +12,5 @@ void main() {
   #include <project_vertex>
 
   vViewPosition = -mvPosition.xyz;
+  vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
 }

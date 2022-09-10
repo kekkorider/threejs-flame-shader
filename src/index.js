@@ -7,7 +7,8 @@ import {
   Mesh,
   Clock,
   Vector2,
-  MeshBasicMaterial
+  MeshBasicMaterial,
+  RepeatWrapping
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
@@ -59,6 +60,9 @@ class App {
 
   #update() {
     const elapsed = this.clock.getElapsedTime()
+
+    this.sphere.material.uniforms.u_PivotPosition.value = this.box.position
+    this.sphere.material.uniforms.u_time.value = elapsed
   }
 
   #render() {
@@ -89,12 +93,16 @@ class App {
   }
 
   async #loadTextures() {
-    const [matcap] = await textureLoader.load([
-      '/matcap-01.png'
+    const [matcap, noise] = await textureLoader.load([
+      '/matcap-01.png',
+      '/noise.jpg'
     ])
 
+    noise.wrapS = noise.wrapT = RepeatWrapping
+
     this.textures = {
-      matcap
+      matcap,
+      noise
     }
   }
 
@@ -115,6 +123,7 @@ class App {
     this.sphere = new Mesh(geometry, SphereMaterial)
 
     this.sphere.material.uniforms.matcap.value = this.textures.matcap
+    this.sphere.material.uniforms.t_noise.value = this.textures.noise
 
     this.sphere.position.set(1.7, 0.1, 0.0)
 
